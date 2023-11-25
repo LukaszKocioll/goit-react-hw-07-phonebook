@@ -1,66 +1,61 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { useDispatch } from 'react-redux';
+import { useAddContactMutation } from '../../api/contactsApi';
 import { nanoid } from 'nanoid';
 
+const ContactForm = () => {
+  const dispatch = useDispatch();
+  const [name, setName] = useState('');
+  const [number, setNumber] = useState('');
 
-export class ContactForm extends React.Component {
-  state = {
-    name: '',
-    number: '',
+  const [addContact, { isLoading }] = useAddContactMutation();
+
+  const handleNameChange = (event) => {
+    setName(event.target.value);
   };
 
-  handleNameChange = (event) => {
-    this.setState({ name: event.target.value });
+  const handleNumberChange = (event) => {
+    setNumber(event.target.value);
   };
 
-  handleNumberChange = (event) => {
-    this.setState({ number: event.target.value });
-  };
+  const handleSubmit = async (event) => {
+    event.preventDefault();
 
-  handleAddContact = () => {
-    const { name, number } = this.state;
     if (name.trim() === '' || number.trim() === '') {
       alert('Please enter a valid name and number.');
       return;
     }
 
-    this.props.onAddContact({
-      id: nanoid(),
-      name: name,
-      number: number,
-    });
+    try {
+      const response = await addContact({
+        id: nanoid(),
+        name,
+        number,
+      });
 
-    this.setState({
-      name: '',
-      number: '',
-    });
+      console.log('Contact added successfully', response);
+     
+      setName('');
+      setNumber('');
+    } catch (error) {
+      console.error('Error adding contact', error);
+      
+    }
   };
 
-  render() {
-    const { name, number } = this.state;
-
-    return (
-      <div>
+  return (
+    <div>
+      <form onSubmit={handleSubmit}>
         <label htmlFor="name">Name:</label>
-        <input
-          type="text"
-          id="name"
-          name="name"
-          value={name}
-          onChange={this.handleNameChange}
-        />
+        <input type="text" id="name" name="name" value={name} onChange={handleNameChange} />
 
         <label htmlFor="number">Number:</label>
-        <input
-          type="tel"
-          id="number"
-          name="number"
-          value={number}
-          onChange={this.handleNumberChange}
-        />
+        <input type="tel" id="number" name="number" value={number} onChange={handleNumberChange} />
 
-        <button onClick={this.handleAddContact}>Add Contact</button>
-      </div>
-    );
-  }
-}
+        <button type="submit" disabled={isLoading}>Add Contact</button>
+      </form>
+    </div>
+  );
+};
+
 export default ContactForm;
