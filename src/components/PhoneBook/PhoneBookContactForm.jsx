@@ -4,7 +4,6 @@ import { useAddContactMutation } from '../../api/contactsApi';
 import { nanoid } from 'nanoid';
 
 const ContactForm = () => {
-  const dispatch = useDispatch();
   const [name, setName] = useState('');
   const [number, setNumber] = useState('');
 

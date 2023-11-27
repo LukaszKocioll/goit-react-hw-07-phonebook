@@ -9,7 +9,6 @@ import 'index.css';
 const App = () => {
   const dispatch = useDispatch();
   const contacts = useSelector((state) => state.contacts.contacts);
-  const filter = useSelector((state) => state.contacts.filter);
 
   useEffect(() => {
     dispatch(fetchContacts());
