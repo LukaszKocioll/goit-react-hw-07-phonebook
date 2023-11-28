@@ -1,29 +1,33 @@
 import React, { useEffect } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { fetchContacts, addContact, deleteContact } from '../redux/contactsSlice';
+import { useDispatch } from 'react-redux';
+import { useGetContactsQuery, useAddContactMutation } from '../api/contactsApi';
+import { addContact, deleteContact, setFilter } from '../redux/contactsSlice';
 import ContactForm from './PhoneBook/PhoneBookContactForm';
 import ContactList from './PhoneBook/PhoneBookContactList';
-import { setFilter } from '../redux/contactsSlice';
 import 'index.css';
 
 const App = () => {
   const dispatch = useDispatch();
-  const contacts = useSelector((state) => state.contacts.contacts);
+  const { data: contacts } = useGetContactsQuery();
+  const [addContactMutation] = useAddContactMutation();
 
   useEffect(() => {
-    dispatch(fetchContacts());
-  }, [dispatch]);
+    if (contacts) {
+      dispatch(setFilter('')); 
+    }
+  }, [contacts, dispatch]);
 
-  const handleAddContact = (newContact) => {
-    dispatch(addContact(newContact));
+  const handleAddContact = async (newContact) => {
+    try {
+      const { data: addedContact } = await addContactMutation(newContact);
+      dispatch(addContact(addedContact));
+    } catch (error) {
+      console.error('Error adding contact:', error);
+    }
   };
 
   const handleDeleteContact = (id) => {
     dispatch(deleteContact(id));
-  };
-
-  const handleFilterChange = (event) => {
-    dispatch(setFilter(event.target.value));
   };
 
   return (
@@ -32,11 +36,7 @@ const App = () => {
       <h2>Add a Contact</h2>
       <ContactForm onAddContact={handleAddContact} />
       <h2>Contacts</h2>
-      <ContactList
-        contacts={contacts}
-        onDeleteContact={handleDeleteContact}
-        onFilterChange={handleFilterChange}
-      />
+      <ContactList contacts={contacts || []} onDeleteContact={handleDeleteContact} />
     </div>
   );
 };
