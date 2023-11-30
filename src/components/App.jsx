@@ -1,33 +1,50 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
-import { useGetContactsQuery, useAddContactMutation } from '../api/contactsApi';
-import { addContact, deleteContact, setFilter } from '../redux/contactsSlice';
+import { useAddContactMutation, useDeleteContactMutation, useGetContactsQuery } from '../api/contactsApi';
+import { setFilter, fetchContacts } from '../redux/contactsSlice';
 import ContactForm from './PhoneBook/PhoneBookContactForm';
 import ContactList from './PhoneBook/PhoneBookContactList';
 import 'index.css';
 
 const App = () => {
   const dispatch = useDispatch();
-  const { data: contacts } = useGetContactsQuery();
-  const [addContactMutation] = useAddContactMutation();
+  const [contacts, setContacts] = useState([]);
+  const { data: initialContacts } = useGetContactsQuery();
 
   useEffect(() => {
-    if (contacts) {
-      dispatch(setFilter('')); 
+    if (initialContacts) {
+      setContacts(initialContacts);
+      dispatch(setFilter(''));
     }
-  }, [contacts, dispatch]);
+  }, [initialContacts, dispatch]);
+
+  const [addContactMutation] = useAddContactMutation();
+  const [deleteContactMutation] = useDeleteContactMutation();
 
   const handleAddContact = async (newContact) => {
     try {
       const { data: addedContact } = await addContactMutation(newContact);
-      dispatch(addContact(addedContact));
+
+      const updatedContacts = await fetchContacts();
+      dispatch(fetchContacts.fulfilled(updatedContacts.payload));
+
+      setContacts((prevContacts) => [...prevContacts, addedContact]);
     } catch (error) {
       console.error('Error adding contact:', error);
     }
   };
 
-  const handleDeleteContact = (id) => {
-    dispatch(deleteContact(id));
+  const handleDeleteContact = async (id) => {
+    try {
+      await deleteContactMutation(id);
+
+      const updatedContacts = await fetchContacts();
+      dispatch(fetchContacts.fulfilled(updatedContacts.payload));
+
+      setContacts((prevContacts) => prevContacts.filter((contact) => contact.id !== id));
+    } catch (error) {
+      console.error('Error deleting contact:', error);
+    }
   };
 
   return (
