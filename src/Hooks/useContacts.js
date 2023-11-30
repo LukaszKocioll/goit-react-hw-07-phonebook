@@ -6,6 +6,7 @@ import { useGetContactsQuery } from '../api/contactsApi';
 export function useContacts() {
   const [contacts, setContacts] = useState([]);
   const dispatch = useDispatch();
+  const getContactsQuery = useGetContactsQuery(); // Przeniesiono do poziomu komponentu
 
   useEffect(() => {
     const storedContacts = localStorage.getItem('contacts');
@@ -21,8 +22,8 @@ export function useContacts() {
   const handleAddContact = async (newContact) => {
     setContacts((prevContacts) => [...prevContacts, newContact]);
 
-    // Dodaj ten fragment, aby ponownie pobrać kontakty po dodaniu nowego
-    const updatedContacts = await useGetContactsQuery();
+    // Przekazanie danych do funkcji
+    const updatedContacts = await getContactsQuery;
     dispatch(fetchContacts.fulfilled(updatedContacts.data));
   };
 
