@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { useAddContactMutation, useDeleteContactMutation, useGetContactsQuery } from '../api/contactsApi';
-import { addContact, deleteContact, setFilter, fetchContacts } from '../redux/contactsSlice';
+import { setFilter, fetchContacts } from '../redux/contactsSlice';
 import ContactForm from './PhoneBook/PhoneBookContactForm';
 import ContactList from './PhoneBook/PhoneBookContactList';
 import 'index.css';
