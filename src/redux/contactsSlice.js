@@ -15,7 +15,6 @@ export const addContact = createAsyncThunk('contacts/addContact', async (newCont
 export const deleteContact = createAsyncThunk('contacts/deleteContact', async (id) => {
   await useDeleteContactMutation(id);
 
-  // Aktualizacja stanu Redux Toolkit
   const updatedContacts = await useGetContactsQuery();
   return updatedContacts.data;
 });
@@ -34,7 +33,7 @@ const contactsSlice = createSlice({
         state.contacts = action.payload;
       })
       .addCase(addContact.fulfilled, (state, action) => {
-        state.contacts.push(action.payload);
+        state.contacts = [...state.contacts, action.payload];
       })
       .addCase(deleteContact.fulfilled, (state, action) => {
         state.contacts = action.payload;

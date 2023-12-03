@@ -1,15 +1,18 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
-import { useAddContactMutation, useDeleteContactMutation, useGetContactsQuery } from '../api/contactsApi';
-import { setFilter, fetchContacts } from '../redux/contactsSlice';
+import {
+  useAddContactMutation,
+  useDeleteContactMutation,
+  useGetContactsQuery,
+} from '../api/contactsApi';
+import { setFilter, fetchContacts, addContact } from '../redux/contactsSlice';
 import ContactForm from './PhoneBook/PhoneBookContactForm';
 import ContactList from './PhoneBook/PhoneBookContactList';
-import 'index.css';
 
 const App = () => {
   const dispatch = useDispatch();
   const [contacts, setContacts] = useState([]);
-  const { data: initialContacts } = useGetContactsQuery();
+  const { data: initialContacts, refetch } = useGetContactsQuery();
 
   useEffect(() => {
     if (initialContacts) {
@@ -21,14 +24,30 @@ const App = () => {
   const [addContactMutation] = useAddContactMutation();
   const [deleteContactMutation] = useDeleteContactMutation();
 
+  const onAddContact = (newContact) => {
+    setContacts((prevContacts) => [...prevContacts, newContact]);
+  };
+
+  const setName = () => {
+  };
+
+  const setNumber = () => {
+  };
+
   const handleAddContact = async (newContact) => {
     try {
       const { data: addedContact } = await addContactMutation(newContact);
 
-      const updatedContacts = await fetchContacts();
-      dispatch(fetchContacts.fulfilled(updatedContacts.payload));
+      await refetch();
 
-      setContacts((prevContacts) => [...prevContacts, addedContact]);
+      dispatch(addContact.fulfilled(addedContact));
+
+      console.log('Contact added successfully', addedContact);
+
+      onAddContact(addedContact);
+
+      setName('');
+      setNumber('');
     } catch (error) {
       console.error('Error adding contact:', error);
     }
@@ -53,7 +72,12 @@ const App = () => {
       <h2>Add a Contact</h2>
       <ContactForm onAddContact={handleAddContact} />
       <h2>Contacts</h2>
-      <ContactList contacts={contacts || []} onDeleteContact={handleDeleteContact} />
+      {}
+      <ContactList
+        contacts={contacts || []}
+        onDeleteContact={handleDeleteContact}
+        onAddContact={onAddContact}
+      />
     </div>
   );
 };
